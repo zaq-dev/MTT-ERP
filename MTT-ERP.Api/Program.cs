@@ -92,11 +92,14 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
+// if (app.Environment.IsDevelopment())
+// {
+//     app.MapOpenApi();
+//     app.MapScalarApiReference();
+// }
+
+app.MapOpenApi();
+app.MapScalarApiReference();
 
 // GET all invoices (with optional status or search query)
 app.MapGet("/api/invoices", async (string? status, string? search, MTT_ERPDbContext db) =>
