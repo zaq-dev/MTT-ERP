@@ -1,0 +1,87 @@
+@inject IHttpClientFactory HttpClientFactory
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="_invoice" OnValidSubmit="SubmitAsync" id="create-invoice-form">
+            <DataAnnotationsValidator />
+
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    <MudTextField Label="Customer / Company Name" @bind-Value="_invoice.CustomerName"
+                                  For="@(() => _invoice.CustomerName)" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField Label="Billing Email" @bind-Value="_invoice.CustomerEmail"
+                                  For="@(() => _invoice.CustomerEmail)" Immediate="true" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker Label="Due Date" @bind-Date="_dueDate" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudNumericField Label="Line Item Quantity" @bind-Value="_invoice.Quantity"
+                                     For="@(() => _invoice.Quantity)" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudNumericField Label="Subtotal (AED)" @bind-Value="_invoice.Subtotal"
+                                     For="@(() => _invoice.Subtotal)" Format="N2" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudSelect Label="Status" @bind-Value="_invoice.Status" Variant="Variant.Outlined">
+                        @foreach (var s in Enum.GetValues<InvoiceStatus>())
+                        {
+                            <MudSelectItem Value="@s">@s</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+            </MudGrid>
+
+            @* Live 5% UAE VAT Preview Card *@
+            <MudPaper Elevation="0" Class="pa-3 mt-4 rounded-lg" Style="background-color: var(--mud-palette-background-grey);">
+                <div class="d-flex justify-space-between">
+                    <MudText Typo="Typo.body2">Subtotal:</MudText>
+                    <MudText Typo="Typo.body2">AED @_invoice.Subtotal.ToString("N2")</MudText>
+                </div>
+                <div class="d-flex justify-space-between">
+                    <MudText Typo="Typo.body2">UAE VAT (5%):</MudText>
+                    <MudText Typo="Typo.body2">AED @_invoice.VatAmount.ToString("N2")</MudText>
+                </div>
+                <MudDivider Class="my-1" />
+                <div class="d-flex justify-space-between">
+                    <MudText Typo="Typo.subtitle2" Style="font-weight: 700;">Total Receivable:</MudText>
+                    <MudText Typo="Typo.subtitle2" Color="Color.Primary" Style="font-weight: 700;">AED @_invoice.TotalAmount.ToString("N2")</MudText>
+                </div>
+            </MudPaper>
+        </EditForm>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="() => MudDialog.Cancel()">Cancel</MudButton>
+        <MudButton ButtonType="ButtonType.Submit" form="create-invoice-form"
+                   Variant="Variant.Filled" Color="Color.Primary">Create Invoice</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    private Invoice _invoice = new();
+    private DateTime? _dueDate = DateTime.Today.AddDays(14);
+
+    private async Task SubmitAsync()
+    {
+        _invoice.DueDate = _dueDate ?? DateTime.Today.AddDays(14);
+        var client = HttpClientFactory.CreateClient("MTT-ERPApi");
+        var res = await client.PostAsJsonAsync("api/invoices", _invoice);
+
+        if (res.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Invoice created successfully!", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        else
+        {
+            Snackbar.Add("Failed to save invoice.", Severity.Error);
+        }
+    }
+}

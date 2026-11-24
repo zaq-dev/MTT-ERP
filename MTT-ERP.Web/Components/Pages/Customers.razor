@@ -1,0 +1,59 @@
+@page "/customers"
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>Customers — MTT ERP</PageTitle>
+
+<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+    <div>
+        <MudText Typo="Typo.h6" Style="font-weight: 600;">B2B Customer Directory</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary">Client accounts and outstanding UAE receivables</MudText>
+    </div>
+</MudStack>
+
+@if (_customers is null)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <MudPaper Elevation="0" Class="pa-4 rounded-xl" Style="border: 1px solid var(--mud-palette-divider);">
+        <MudDataGrid T="CustomerSummaryDto" Items="@_customers" Hover="true" Elevation="0">
+            <Columns>
+                <TemplateColumn Title="Company" SortBy="x => x.CustomerName">
+                    <CellTemplate>
+                        <div class="d-flex align-center gap-3 py-1">
+                            <MudAvatar Color="Color.Primary" Size="Size.Small">
+                                @context.Item.CustomerName[..1].ToUpper()
+                            </MudAvatar>
+                            <div>
+                                <MudText Typo="Typo.body2" Style="font-weight: 600;">@context.Item.CustomerName</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@context.Item.CustomerEmail</MudText>
+                            </div>
+                        </div>
+                    </CellTemplate>
+                </TemplateColumn>
+                <PropertyColumn Property="x => x.InvoiceCount" Title="Total Invoices" />
+                <PropertyColumn Property="x => x.TotalBilled" Title="Total Billed (AED)" Format="N2" />
+                <PropertyColumn Property="x => x.PendingBalance" Title="Pending Balance (AED)" Format="N2" />
+                <TemplateColumn Title="Account Standing" Sortable="false">
+                    <CellTemplate>
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                                 Color="@(context.Item.PendingBalance == 0 ? Color.Success : Color.Warning)">
+                            @(context.Item.PendingBalance == 0 ? "Settled" : "Balance Due")
+                        </MudChip>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+    </MudPaper>
+}
+
+@code {
+    private List<CustomerSummaryDto>? _customers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = HttpClientFactory.CreateClient("MTT-ERPApi"); // match your registered HttpClient name
+        _customers = await client.GetFromJsonAsync<List<CustomerSummaryDto>>("api/customers");
+    }
+}

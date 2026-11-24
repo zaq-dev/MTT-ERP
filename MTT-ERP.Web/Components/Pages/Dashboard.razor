@@ -1,0 +1,159 @@
+@page "/"
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>Dashboard — MTT ERP</PageTitle>
+
+<MudText Typo="Typo.h6" Class="mb-3" Style="font-weight: 600;">Executive Overview</MudText>
+
+@if (_summary is null || _recentInvoices is null)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    @* 4 Equal-Width KPI Cards with Theme Gradient Borders *@
+    <MudGrid Class="mb-6">
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="0" Class="pa-4 rounded-xl h-100 kpi-gradient-card">
+                <div class="d-flex align-center gap-2 mb-2">
+                    <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Small" Rounded="true">
+                        <MudIcon Icon="@Icons.Material.Filled.AccountBalanceWallet" Size="Size.Small" />
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.body2" Style="font-weight: 600;">Total Receivables</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Primary">Active pipeline</MudText>
+                    </div>
+                </div>
+                <MudText Typo="Typo.h5" Style="font-weight: 700;" Class="mt-3">AED @_summary.TotalReceivables.ToString("N0")</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">All active invoices (incl. 5% VAT)</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="0" Class="pa-4 rounded-xl h-100 kpi-gradient-card">
+                <div class="d-flex align-center gap-2 mb-2">
+                    <MudAvatar Color="Color.Success" Variant="Variant.Filled" Size="Size.Small" Rounded="true">
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" />
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.body2" Style="font-weight: 600;">Paid</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Success">Settled revenue</MudText>
+                    </div>
+                </div>
+                <MudText Typo="Typo.h5" Style="font-weight: 700;" Class="mt-3">AED @_summary.PaidAmount.ToString("N0")</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Cleared bank transfers</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="0" Class="pa-4 rounded-xl h-100 kpi-gradient-card">
+                <div class="d-flex align-center gap-2 mb-2">
+                    <MudAvatar Color="Color.Info" Variant="Variant.Filled" Size="Size.Small" Rounded="true">
+                        <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Small" />
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.body2" Style="font-weight: 600;">Unpaid</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Info">Pending clearance</MudText>
+                    </div>
+                </div>
+                <MudText Typo="Typo.h5" Style="font-weight: 700;" Class="mt-3">AED @_summary.UnpaidAmount.ToString("N0")</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Awaiting client settlement</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="0" Class="pa-4 rounded-xl h-100 kpi-gradient-card">
+                <div class="d-flex align-center gap-2 mb-2">
+                    <MudAvatar Color="Color.Warning" Variant="Variant.Filled" Size="Size.Small" Rounded="true">
+                        <MudIcon Icon="@Icons.Material.Filled.WarningAmber" Size="Size.Small" />
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.body2" Style="font-weight: 600;">Overdue</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Warning">@_summary.OverduePercentage% of unpaid</MudText>
+                    </div>
+                </div>
+                <MudText Typo="Typo.h5" Style="font-weight: 700;" Class="mt-3">AED @_summary.OverdueAmount.ToString("N0")</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Past due date follow-up</MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    @* Dashboard-Specific Widgets: Recent Invoices + VAT Compliance Summary *@
+    <MudGrid>
+        <MudItem xs="12" md="8">
+            <MudPaper Elevation="0" Class="pa-4 rounded-xl" Style="border: 1px solid var(--mud-palette-divider);">
+                <div class="d-flex justify-space-between align-center mb-3">
+                    <MudText Typo="Typo.subtitle1" Style="font-weight: 600;">Recent Activity</MudText>
+                    <MudButton Variant="Variant.Text" Color="Color.Primary" Href="invoices" EndIcon="@Icons.Material.Filled.ArrowForward">
+                        View All Invoices
+                    </MudButton>
+                </div>
+                <MudSimpleTable Hover="true" Dense="true" Elevation="0">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Client</th>
+                            <th>Due Date</th>
+                            <th>Amount (AED)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var inv in _recentInvoices.Take(5))
+                        {
+                            <tr>
+                                <td><strong>@inv.InvoiceCode</strong></td>
+                                <td>@inv.CustomerName</td>
+                                <td>@inv.DueDate.ToString("dd MMM yyyy")</td>
+                                <td>@inv.TotalAmount.ToString("N2")</td>
+                                <td>
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                                             Color="@(inv.Status == InvoiceStatus.Completed ? Color.Success : inv.Status == InvoiceStatus.Pending ? Color.Warning : Color.Error)">
+                                        @inv.Status
+                                    </MudChip>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+            <MudPaper Elevation="0" Class="pa-4 rounded-xl h-100" Style="border: 1px solid var(--mud-palette-divider);">
+                <MudText Typo="Typo.subtitle1" Class="mb-3" Style="font-weight: 600;">UAE VAT & Collection Health</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">Collection Rate</MudText>
+                @{
+                    var collectionPct = _summary.TotalReceivables > 0
+                        ? Math.Round((_summary.PaidAmount / _summary.TotalReceivables) * 100, 1)
+                        : 0;
+                }
+                <MudText Typo="Typo.h4" Color="Color.Primary" Style="font-weight: 700;">@collectionPct%</MudText>
+                <MudProgressLinear Color="Color.Primary" Value="@((double)collectionPct)" Class="my-3 rounded" Style="height: 10px;" />
+
+                <MudDivider Class="my-3" />
+                <div class="d-flex justify-space-between mb-2">
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Estimated 5% Output VAT:</MudText>
+                    <MudText Typo="Typo.body2" Style="font-weight: 600;">
+                        AED @(_recentInvoices.Where(i => i.Status != InvoiceStatus.Canceled).Sum(i => i.VatAmount).ToString("N2"))
+                    </MudText>
+                </div>
+                <MudButton FullWidth="true" Variant="Variant.Filled" Color="Color.Primary" Href="analytics" Class="mt-3">
+                    Open Financial Analytics
+                </MudButton>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    private InvoiceSummaryDto? _summary;
+    private List<Invoice>? _recentInvoices;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = HttpClientFactory.CreateClient("MTT-ERPApi"); // match your registered HttpClient name
+        _summary = await client.GetFromJsonAsync<InvoiceSummaryDto>("api/invoices/summary");
+        _recentInvoices = await client.GetFromJsonAsync<List<Invoice>>("api/invoices");
+    }
+}

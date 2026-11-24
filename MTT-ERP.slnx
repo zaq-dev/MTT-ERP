@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="MTT-ERP.Api/MTT-ERP.Api.csproj" />
+  <Project Path="MTT-ERP.Shared/MTT-ERP.Shared.csproj" />
+  <Project Path="MTT-ERP.Web/MTT-ERP.Web.csproj" />
+</Solution>

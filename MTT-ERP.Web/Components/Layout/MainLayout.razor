@@ -1,0 +1,102 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="_theme" @bind-IsDarkMode="_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="0" Variant="DrawerVariant.Persistent"
+               Style="border-right: 1px solid var(--mud-palette-divider); width: 250px;">
+        <div class="pa-4 d-flex align-center gap-3">
+            <MudAvatar Color="Color.Primary" Rounded="true" Size="Size.Medium">
+                <MudIcon Icon="@Icons.Material.Filled.Bolt" />
+            </MudAvatar>
+            <MudText Typo="Typo.h6" Style="font-weight: 700; letter-spacing: -0.5px;">MTT ERP</MudText>
+        </div>
+
+        <MudNavMenu Class="px-2">
+            <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Dashboard" Class="rounded-lg mb-1">Dashboard</MudNavLink>
+            <MudNavLink Href="invoices" Icon="@Icons.Material.Filled.ReceiptLong" Class="rounded-lg mb-1">Invoices</MudNavLink>
+            <MudNavLink Href="customers" Icon="@Icons.Material.Outlined.People" Class="rounded-lg mb-1">Customers</MudNavLink>
+            <MudNavLink Href="analytics" Icon="@Icons.Material.Outlined.BarChart" Class="rounded-lg mb-1">Analytics</MudNavLink>
+        </MudNavMenu>
+
+        <MudSpacer />
+
+        <div class="pa-3">
+            <div class="d-flex align-center justify-space-between px-2 py-1 mb-3">
+                <div class="d-flex align-center gap-2">
+                    <MudIcon Icon="@Icons.Material.Outlined.DarkMode" Size="Size.Small" />
+                    <MudText Typo="Typo.body2">Dark Mode</MudText>
+                </div>
+                <MudSwitch @bind-Value="_isDarkMode" Color="Color.Primary" />
+            </div>
+
+            <MudPaper Elevation="0" Class="pa-2 rounded-lg d-flex align-center gap-2"
+                      Style="background-color: var(--mud-palette-background-grey);">
+                <MudAvatar Color="Color.Secondary" Size="Size.Small">MT</MudAvatar>
+                <div style="overflow: hidden;">
+                    <MudText Typo="Typo.body2" Style="font-weight: 600; white-space: nowrap;">Thanveer Thahsheen</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary" Style="display: block; text-overflow: ellipsis; overflow: hidden;">admin@mtt.ae</MudText>
+                </div>
+            </MudPaper>
+        </div>
+    </MudDrawer>
+
+    <MudMainContent Style="min-height: 100vh;">
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-5 px-6">
+            @* Top Greeting Header *@
+            <div class="d-flex flex-wrap justify-space-between align-center mb-5 gap-3">
+                <div>
+                    <MudText Typo="Typo.h5" Style="font-weight: 700;">Hi, Thanveer Thahsheen</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">Welcome back to MTT ERP — UAE Operations</MudText>
+                </div>
+            </div>
+
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+<style>
+    .mud-nav-link.active {
+        background: linear-gradient(90deg, #7C69EF 0%, #9F91F7 100%) !important;
+        color: #ffffff !important;
+        font-weight: 600;
+    }
+    .mud-nav-link.active .mud-nav-link-icon {
+        color: #ffffff !important;
+    }
+    /* Equal-sized KPI card with theme gradient border and clean surface background */
+    .kpi-gradient-card {
+        border: 2px solid transparent !important;
+        background:
+            linear-gradient(var(--mud-palette-surface), var(--mud-palette-surface)) padding-box,
+            linear-gradient(135deg, #7C69EF 0%, #9E8DFB 100%) border-box !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+</style>
+
+@code {
+    private bool _drawerOpen = true;
+    private bool _isDarkMode = false;
+
+    private readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#7C69EF",
+            Secondary = "#4F46E5",
+            Background = "#F8F9FC",
+            Surface = "#FFFFFF",
+            DrawerBackground = "#F4F5FA"
+        },
+        Typography = new Typography()
+        {
+            Default = new DefaultTypography() { FontFamily = ["Inter", "Roboto", "sans-serif"] }
+        }
+    };
+}

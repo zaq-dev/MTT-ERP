@@ -1,0 +1,220 @@
+@page "/invoices"
+@using MTT_ERP.Web.Components.Dialogs
+@inject IHttpClientFactory HttpClientFactory
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Invoices — MTT ERP</PageTitle>
+
+<MudText Typo="Typo.h6" Class="mb-3" Style="font-weight: 600;">Invoice List</MudText>
+
+@* 4 KPI Summary Cards matching the reference design *@
+@if (_summary is not null)
+{
+    <MudGrid Class="mb-6">
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="0" Class="pa-4 rounded-xl h-100 kpi-gradient-card">
+                <div class="d-flex align-center gap-2 mb-2">
+                    <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Small" Rounded="true">
+                        <MudIcon Icon="@Icons.Material.Filled.AccountBalanceWallet" Size="Size.Small" />
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.body2" Style="font-weight: 600;">Total Receivables</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Primary">Active pipeline</MudText>
+                    </div>
+                </div>
+                <MudText Typo="Typo.h5" Style="font-weight: 700;" Class="mt-3">AED @_summary.TotalReceivables.ToString("N0")</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">All active invoices (incl. 5% VAT)</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="0" Class="pa-4 rounded-xl h-100 kpi-gradient-card">
+                <div class="d-flex align-center gap-2 mb-2">
+                    <MudAvatar Color="Color.Success" Variant="Variant.Filled" Size="Size.Small" Rounded="true">
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" />
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.body2" Style="font-weight: 600;">Paid</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Success">Settled revenue</MudText>
+                    </div>
+                </div>
+                <MudText Typo="Typo.h5" Style="font-weight: 700;" Class="mt-3">AED @_summary.PaidAmount.ToString("N0")</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Cleared bank transfers</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="0" Class="pa-4 rounded-xl h-100 kpi-gradient-card">
+                <div class="d-flex align-center gap-2 mb-2">
+                    <MudAvatar Color="Color.Info" Variant="Variant.Filled" Size="Size.Small" Rounded="true">
+                        <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Small" />
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.body2" Style="font-weight: 600;">Unpaid</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Info">Pending clearance</MudText>
+                    </div>
+                </div>
+                <MudText Typo="Typo.h5" Style="font-weight: 700;" Class="mt-3">AED @_summary.UnpaidAmount.ToString("N0")</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Awaiting client settlement</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Elevation="0" Class="pa-4 rounded-xl h-100 kpi-gradient-card">
+                <div class="d-flex align-center gap-2 mb-2">
+                    <MudAvatar Color="Color.Warning" Variant="Variant.Filled" Size="Size.Small" Rounded="true">
+                        <MudIcon Icon="@Icons.Material.Filled.WarningAmber" Size="Size.Small" />
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.body2" Style="font-weight: 600;">Overdue</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Warning">@_summary.OverduePercentage% of unpaid</MudText>
+                    </div>
+                </div>
+                <MudText Typo="Typo.h5" Style="font-weight: 700;" Class="mt-3">AED @_summary.OverdueAmount.ToString("N0")</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Past due date follow-up</MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+@* Filter Bar & Actions *@
+<MudPaper Elevation="0" Class="pa-4 rounded-xl" Style="border: 1px solid var(--mud-palette-divider);">
+    <div class="d-flex flex-wrap justify-space-between align-center gap-3 mb-4">
+        <MudButtonGroup Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small">
+            <MudButton Variant="@(_selectedFilter == "" ? Variant.Filled : Variant.Outlined)" OnClick="@(() => FilterByStatus(""))">All</MudButton>
+            <MudButton Variant="@(_selectedFilter == "Completed" ? Variant.Filled : Variant.Outlined)" OnClick="@(() => FilterByStatus("Completed"))">Paid</MudButton>
+            <MudButton Variant="@(_selectedFilter == "Pending" ? Variant.Filled : Variant.Outlined)" OnClick="@(() => FilterByStatus("Pending"))">Unpaid</MudButton>
+        </MudButtonGroup>
+
+        <div class="d-flex flex-wrap align-center gap-2">
+            <MudTextField T="string" Value="_searchText" ValueChanged="OnSearchChanged"
+                          Placeholder="Search client or ID..." Variant="Variant.Outlined"
+                          Margin="Margin.Dense" Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search" Immediate="true" DebounceInterval="300" />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreateDialogAsync">
+                Add Invoice
+            </MudButton>
+        </div>
+    </div>
+
+    @if (_invoices is null)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+    }
+    else
+    {
+        <MudDataGrid T="Invoice" Items="@_invoices" Hover="true" Dense="false" Elevation="0">
+            <Columns>
+                <PropertyColumn Property="x => x.InvoiceCode" Title="Invoice ID" />
+                <TemplateColumn Title="User Info" SortBy="x => x.CustomerName">
+                    <CellTemplate>
+                        <div class="d-flex align-center gap-3 py-1">
+                            <MudAvatar Color="Color.Primary" Size="Size.Small">
+                                @context.Item.CustomerName[..1].ToUpper()
+                            </MudAvatar>
+                            <div>
+                                <MudText Typo="Typo.body2" Style="font-weight: 600;">@context.Item.CustomerName</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@context.Item.CustomerEmail</MudText>
+                            </div>
+                        </div>
+                    </CellTemplate>
+                </TemplateColumn>
+                <PropertyColumn Property="x => x.CreateDate" Title="Create Date" Format="dd/MM/yyyy" />
+                <PropertyColumn Property="x => x.DueDate" Title="Due Date" Format="dd/MM/yyyy" />
+                <PropertyColumn Property="x => x.Quantity" Title="Quantity" />
+                <PropertyColumn Property="x => x.TotalAmount" Title="Total (incl. VAT)" Format="N2" />
+                <TemplateColumn Title="Status" SortBy="x => x.Status">
+                    <CellTemplate>
+                        @{
+                            var color = context.Item.Status switch
+                            {
+                                InvoiceStatus.Completed => Color.Success,
+                                InvoiceStatus.Pending => Color.Warning,
+                                _ => Color.Error
+                            };
+                        }
+                        <MudChip T="string" Color="@color" Variant="Variant.Outlined" Size="Size.Small">
+                            @context.Item.Status
+                        </MudChip>
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Actions" Sortable="false">
+    <CellTemplate>
+        <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center" Style="white-space: nowrap;">
+            <MudTooltip Text="Mark Paid">
+                <MudIconButton Icon="@Icons.Material.Outlined.CheckCircle" Size="Size.Small" Color="Color.Success"
+                               Disabled="@(context.Item.Status == InvoiceStatus.Completed)"
+                               OnClick="@(() => MarkPaidAsync(context.Item.Id))" />
+            </MudTooltip>
+            <MudTooltip Text="Delete">
+                <MudIconButton Icon="@Icons.Material.Outlined.Delete" Size="Size.Small" Color="Color.Error"
+                               OnClick="@(() => DeleteAsync(context.Item.Id))" />
+            </MudTooltip>
+        </MudStack>
+    </CellTemplate>
+</TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="Invoice" />
+            </PagerContent>
+        </MudDataGrid>
+    }
+</MudPaper>
+
+@code {
+    private List<Invoice>? _invoices;
+    private InvoiceSummaryDto? _summary;
+    private string _selectedFilter = "";
+    private string _searchText = "";
+
+    protected override async Task OnInitializedAsync() => await LoadDataAsync();
+
+    private async Task LoadDataAsync()
+    {
+        var client = HttpClientFactory.CreateClient("MTT-ERPApi");
+        var url = $"api/invoices?status={Uri.EscapeDataString(_selectedFilter)}&search={Uri.EscapeDataString(_searchText)}";
+
+        _invoices = await client.GetFromJsonAsync<List<Invoice>>(url);
+        _summary = await client.GetFromJsonAsync<InvoiceSummaryDto>("api/invoices/summary");
+    }
+
+    private async Task FilterByStatus(string status)
+    {
+        _selectedFilter = status;
+        await LoadDataAsync();
+    }
+
+    private async Task OnSearchChanged(string text)
+    {
+        _searchText = text;
+        await LoadDataAsync();
+    }
+
+    private async Task OpenCreateDialogAsync()
+    {
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true };
+        var dialog = await DialogService.ShowAsync<CreateInvoiceDialog>("Create New Invoice", options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+            await LoadDataAsync();
+    }
+
+    private async Task MarkPaidAsync(int id)
+    {
+        var client = HttpClientFactory.CreateClient("MTT-ERPApi");
+        await client.PatchAsync($"api/invoices/{id}/status?status=Completed", null);
+        Snackbar.Add("Invoice marked as Completed!", Severity.Success);
+        await LoadDataAsync();
+    }
+
+    private async Task DeleteAsync(int id)
+    {
+        var client = HttpClientFactory.CreateClient("MTT-ERPApi");
+        await client.DeleteAsync($"api/invoices/{id}");
+        Snackbar.Add("Invoice deleted.", Severity.Info);
+        await LoadDataAsync();
+    }
+}
