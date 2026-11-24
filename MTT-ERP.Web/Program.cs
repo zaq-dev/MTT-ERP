@@ -9,7 +9,7 @@ builder.Services.AddMudServices();
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
-var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5080/";
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5050/";
 
 builder.Services.AddHttpClient("MTT-ERPApi", client =>
 {
