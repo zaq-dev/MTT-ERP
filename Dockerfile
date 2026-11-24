@@ -13,6 +13,7 @@ COPY --from=build /app/web ./web
 
 # Run API on internal port 5080 and Blazor Web on public port 8080
 ENV ApiBaseUrl="http://localhost:5080/"
+ENV ASPNETCORE_ENVIRONMENT="Production"
 EXPOSE 8080
 
 CMD ["sh", "-c", "dotnet /app/api/MTT-ERP.Api.dll --urls http://0.0.0.0:5080 & dotnet /app/web/MTT-ERP.Web.dll --urls http://0.0.0.0:8080"]
