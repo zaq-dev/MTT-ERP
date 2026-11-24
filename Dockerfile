@@ -16,4 +16,4 @@ ENV ApiBaseUrl="http://127.0.0.1:5050/"
 ENV ASPNETCORE_ENVIRONMENT="Production"
 EXPOSE 8080
 
-CMD ["sh", "-c", "dotnet /app/api/MTT-ERP.Api.dll --urls http://127.0.0.1:5050 & dotnet /app/web/MTT-ERP.Web.dll --urls http://0.0.0.0:${PORT:-8080}"]
+CMD ["sh", "-c", "(cd /app/api && dotnet MTT-ERP.Api.dll --urls http://127.0.0.1:5050) & (cd /app/web && dotnet MTT-ERP.Web.dll --urls http://0.0.0.0:${PORT:-8080})"]
