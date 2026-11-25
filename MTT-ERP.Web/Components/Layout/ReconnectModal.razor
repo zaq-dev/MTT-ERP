@@ -1,48 +1,58 @@
 <script type="module" src="@Assets["Components/Layout/ReconnectModal.razor.js"]"></script>
 
 <dialog id="components-reconnect-modal" data-nosnippet>
-    <div class="components-reconnect-backdrop">
-        <section class="components-reconnect-surface" aria-live="assertive" aria-atomic="true">
-            <header class="components-reconnect-header">
-                <span class="components-reconnect-status-dot" aria-hidden="true"></span>
-                <h2>Connection Interrupted</h2>
-            </header>
+    <div class="reconnect-card">
+        <div class="ripple-loader" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <div class="ripple-core"></div>
+        </div>
 
-            <p class="components-reconnect-supporting">
-                Your current session is still open. We'll keep trying to restore it.
-            </p>
+        <h3 class="reconnect-title components-reconnect-first-attempt-visible">
+            Reconnecting to MTT ERP
+        </h3>
+        <h3 class="reconnect-title components-reconnect-repeated-attempt-visible">
+            Auto-Retrying Connection
+        </h3>
+        <h3 class="reconnect-title components-reconnect-failed-visible">
+            Connection Lost
+        </h3>
+        <h3 class="reconnect-title components-reconnect-paused-visible">
+            Session Paused
+        </h3>
+        <h3 class="reconnect-title components-reconnect-resume-failed-visible">
+            Unable to Resume
+        </h3>
 
-            <div class="components-rejoin-loader components-reconnect-first-attempt-visible components-reconnect-repeated-attempt-visible" aria-hidden="true">
-                <div></div>
-                <div></div>
-                <div></div>
-            </div>
+        <p class="reconnect-desc components-reconnect-first-attempt-visible">
+            Your workspace is safe. Restoring live server sync automatically...
+        </p>
+        @* <p class="reconnect-desc components-reconnect-repeated-attempt-visible">
+            Rejoin failed. Automatically retrying<span class="retry-countdown"> in
+            <strong id="components-reconnect-seconds-to-next-retry"></strong>s</span>...
+        </p> *@
+        <p class="reconnect-desc components-reconnect-failed-visible">
+            Could not reach the server. Please retry or reload your session.
+        </p>
+        <p class="reconnect-desc components-reconnect-paused-visible">
+            The server paused this session due to inactivity.
+        </p>
+        <p class="reconnect-desc components-reconnect-resume-failed-visible">
+            We couldn't restore the paused session. Please reload to continue.
+        </p>
 
-            <p class="components-reconnect-first-attempt-visible components-reconnect-message">
-                Rejoining the server...
-            </p>
-            <p class="components-reconnect-repeated-attempt-visible components-reconnect-message">
-                Rejoin failed. Trying again in <span id="components-seconds-to-next-attempt"></span>s.
-            </p>
-            <p class="components-reconnect-failed-visible components-reconnect-message components-reconnect-danger">
-                Failed to rejoin. Retry now or reload the page.
-            </p>
-
-            <p class="components-pause-visible components-reconnect-message">
-                The session has been paused by the server.
-            </p>
-            <p class="components-resume-failed-visible components-reconnect-message components-reconnect-danger">
-                Failed to resume the session. Retry now or reload the page.
-            </p>
-
-            <div class="components-reconnect-actions">
-                <button id="components-reconnect-button" class="components-reconnect-failed-visible" type="button">
-                    Retry
-                </button>
-                <button id="components-resume-button" class="components-pause-visible components-resume-failed-visible" type="button">
-                    Resume
-                </button>
-            </div>
-        </section>
+        <div class="reconnect-actions">
+            <button id="components-reconnect-button" class="btn-primary components-reconnect-failed-visible">
+                Retry Now
+            </button>
+            <button id="components-resume-button" class="btn-primary components-reconnect-paused-visible">
+                Resume Session
+            </button>
+            <button type="button"
+                    class="btn-secondary components-reconnect-failed-visible components-reconnect-resume-failed-visible"
+                    onclick="location.reload()">
+                Reload Page
+            </button>
+        </div>
     </div>
 </dialog>

@@ -6,8 +6,8 @@
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="0" Variant="DrawerVariant.Persistent"
-               Style="border-right: 1px solid var(--mud-palette-divider); width: 250px;">
+    <MudDrawer @bind-Open="_drawerOpen" Width="250px" Elevation="1" Variant="DrawerVariant.Responsive"
+               Style="border-right: 1px solid var(--mud-palette-divider);">
         <div class="pa-4 d-flex align-center gap-3">
             <MudAvatar Color="Color.Primary" Rounded="true" Size="Size.Medium">
                 <MudIcon Icon="@Icons.Material.Filled.Bolt" />
@@ -16,10 +16,14 @@
         </div>
 
         <MudNavMenu Class="px-2">
-            <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Dashboard" Class="rounded-lg mb-1">Dashboard</MudNavLink>
-            <MudNavLink Href="invoices" Icon="@Icons.Material.Filled.ReceiptLong" Class="rounded-lg mb-1">Invoices</MudNavLink>
-            <MudNavLink Href="customers" Icon="@Icons.Material.Outlined.People" Class="rounded-lg mb-1">Customers</MudNavLink>
-            <MudNavLink Href="analytics" Icon="@Icons.Material.Outlined.BarChart" Class="rounded-lg mb-1">Analytics</MudNavLink>
+            <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Outlined.Dashboard"
+                        Class="rounded-lg mb-1">Dashboard</MudNavLink>
+            <MudNavLink Href="invoices" Icon="@Icons.Material.Filled.ReceiptLong" Class="rounded-lg mb-1">Invoices
+            </MudNavLink>
+            <MudNavLink Href="customers" Icon="@Icons.Material.Outlined.People" Class="rounded-lg mb-1">Customers
+            </MudNavLink>
+            <MudNavLink Href="analytics" Icon="@Icons.Material.Outlined.BarChart" Class="rounded-lg mb-1">Analytics
+            </MudNavLink>
         </MudNavMenu>
 
         <MudSpacer />
@@ -37,8 +41,10 @@
                       Style="background-color: var(--mud-palette-background-grey);">
                 <MudAvatar Color="Color.Secondary" Size="Size.Small">MT</MudAvatar>
                 <div style="overflow: hidden;">
-                    <MudText Typo="Typo.body2" Style="font-weight: 600; white-space: nowrap;">Thanveer Thahsheen</MudText>
-                    <MudText Typo="Typo.caption" Color="Color.Secondary" Style="display: block; text-overflow: ellipsis; overflow: hidden;">admin@mtt.ae</MudText>
+                    <MudText Typo="Typo.body2" Style="font-weight: 600; white-space: nowrap;">Thanveer Thahsheen
+                    </MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary"
+                             Style="display: block; text-overflow: ellipsis; overflow: hidden;">admin@mtt.ae</MudText>
                 </div>
             </MudPaper>
         </div>
@@ -48,9 +54,20 @@
         <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-5 px-6">
             @* Top Greeting Header *@
             <div class="d-flex flex-wrap justify-space-between align-center mb-5 gap-3">
-                <div>
-                    <MudText Typo="Typo.h5" Style="font-weight: 700;">Hi, Thanveer Thahsheen</MudText>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary">Welcome back to MTT ERP — UAE Operations</MudText>
+                <div class="d-flex align-center gap-3">
+                    <MudTooltip Text="Toggle Navigation">
+                        <MudIconButton Icon="@Icons.Material.Filled.Menu" Variant="Variant.Outlined"
+                                       Color="Color.Primary" OnClick="ToggleDrawer" />
+                    </MudTooltip>
+                    <div>
+                        <MudText Typo="Typo.h5" Style="font-weight: 700;">Hi, Thanveer</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Welcome back to MTT ERP — UAE Operations
+                        </MudText>
+                    </div>
+                </div>
+                <div class="d-flex align-center gap-2">
+                    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Outlined.ReceiptLong"
+                               Href="invoices">Manage Invoices</MudButton>
                 </div>
             </div>
 
@@ -65,9 +82,11 @@
         color: #ffffff !important;
         font-weight: 600;
     }
+
     .mud-nav-link.active .mud-nav-link-icon {
         color: #ffffff !important;
     }
+
     /* Equal-sized KPI card with theme gradient border and clean surface background */
     .kpi-gradient-card {
         border: 2px solid transparent !important;
@@ -81,8 +100,10 @@
 </style>
 
 @code {
-    private bool _drawerOpen = true;
-    private bool _isDarkMode = false;
+    private bool _drawerOpen = false;
+    private bool _isDarkMode = true;
+
+    private void ToggleDrawer() => _drawerOpen = !_drawerOpen;
 
     private readonly MudTheme _theme = new()
     {
