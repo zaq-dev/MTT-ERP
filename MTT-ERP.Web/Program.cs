@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add MudBlazor services
 builder.Services.AddMudServices();
+builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
@@ -32,6 +33,7 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 app.UseStaticFiles();
 app.MapStaticAssets();
+app.MapReverseProxy();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.Run();
